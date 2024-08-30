@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Candidate Referral Form</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 500px; margin: 0 auto; padding: 20px; }
+        form { display: flex; flex-direction: column; }
+        label { margin-top: 10px; }
+        input, select { margin-bottom: 10px; padding: 5px; }
+        input[type="submit"] { cursor: pointer; background-color: #4CAF50; color: white; border: none; padding: 10px; }
+    </style>
+</head>
+<body>
+    <h1>Candidate Referral Form</h1>
+    
+    <form method="POST" enctype="multipart/form-data">
+        <!-- <label for="name">Name:</label> -->
+        <!-- <input type="text" id="name" name="name" required> -->
+        
+        <!-- <label for="phone">Phone Number:</label>
+        <input type="tel" id="phone" name="phone" required>
+         -->
+        <!-- <label for="country">Country:</label>
+        <input type="text" id="country" name="country" required> -->
+        
+        <!-- <label for="email">Email Address:</label>
+        <input type="email" id="email" name="email" required>
+         -->
+        <label for="job_id">Job ID:</label>
+        <input type="text" id="job_id" name="job_id" required>
+        
+        <label for="resume">Resume/CV (PDF only):</label>
+        <input type="file" id="resume" name="resume" accept=".pdf" required>
+        
+        <input type="submit" value="Submit Application">
+    </form>
+</body>
+</html>
