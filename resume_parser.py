@@ -1,17 +1,3 @@
-# # importing required classes 
-# from pypdf import PdfReader 
-  
-# # creating a pdf reader object 
-# reader = PdfReader('C:\\Users\\jgala\\OneDrive - Intel Corporation\Jay personal\\autofill_referral_from_resume\\Dev-Patel-Resume-Intel.pdf') 
-  
-# # printing number of pages in pdf file 
-# print(len(reader.pages)) 
-  
-# # creating a page object 
-# page = reader.pages[0] 
-  
-# # extracting text from page 
-# print(page.extract_text()) 
 import re
 from pdfminer.high_level import extract_text
 
@@ -26,10 +12,6 @@ def extract_info_from_resume(pdf_path):
     
     # Regular expressions for matching
     name_pattern = r'[a-z][a-z\-]+'
-    # mobile_patterns = [
-    #     r'\(?\d{3}\)?[-.\s]?\d{3}[-.\s]?\d{4}',  # (XXX) XXX-XXXX or XXX-XXX-XXXX
-    #     r'\+\d{1,3}\s\d{3}[-.\s]?\d{4}[-.\s]?\d{2}'  # +XX XXX-XXXX-XX
-    # ]
     mobile_patterns = [
     r'\(?\d{3}\)?[-.\s]?\d{3}[-.\s]?\d{4}',  # (XXX) XXX-XXXX or XXX-XXX-XXXX
     r'\+\d{1,3}\s\d{3}[-.\s]?\d{4}[-.\s]?\d{2}',  # +XX XXX-XXXX-XX
@@ -73,6 +55,6 @@ def extract_info_from_resume(pdf_path):
 
 # Example usage
 if __name__ == "__main__":
-    pdf_path = 'Anjali_Mudgal_Curriculum_Vitae.pdf'
+    pdf_path = './'
     result = extract_info_from_resume(pdf_path)
     print(result)

@@ -10,7 +10,7 @@ from selenium.webdriver.common.action_chains import ActionChains
 from threading import Thread
 
 
-def fill_workday_form_using_selenium(referrer_email:str, name:str, email:str, country_name:str, phone_number:str, job_req_id:str, resume_path, form_link:str, chrome_driver_path="", headless:bool=False):
+def fill_workday_form_using_selenium(referrer_email:str, name:str, email:str, country_name:str, phone_number:str, job_req_id:str, resume_path, form_link:str, chrome_driver_path="", headless:bool=True):
     chrome_options = webdriver.ChromeOptions()
     if headless:
         chrome_options.add_argument("--headless=new")
@@ -114,6 +114,7 @@ def fill_workday_form_using_selenium(referrer_email:str, name:str, email:str, co
 
     # submit form
     submit = driver.find_element(By.CSS_SELECTOR, '''.WCUM.WGAO.WCHN.WGVM.WGUM''').click()
+    time.sleep(3)
     # time.sleep(100)
     driver.close()
 

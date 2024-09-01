@@ -2,8 +2,8 @@ import sys
 import json
 from PyQt6.QtWidgets import (QApplication, QWidget, QVBoxLayout, QHBoxLayout, QLabel, QLineEdit, QPushButton, QFileDialog, QMessageBox,
                              QTabWidget, QScrollArea, QFormLayout, QCheckBox, QComboBox, QStackedWidget, QDialog, QMainWindow, QStatusBar)
-from PyQt6.QtGui import QFont, QIcon
-from PyQt6.QtCore import Qt, QSize
+from PyQt6.QtGui import QFont, QIcon, QDesktopServices
+from PyQt6.QtCore import Qt, QSize, QUrl
 from pathlib import Path
 from resume_parser import extract_info_from_resume
 from selenium_autofill import fill_workday_form_using_selenium
@@ -121,7 +121,7 @@ class ReferralApp(QMainWindow):
 
     def setup_history_tab(self):
         layout = QVBoxLayout()
-        history_label = QLabel("Your referral history will appear here.")
+        history_label = QLabel("Your referral history will appear here. (Work in progress)")
         layout.addWidget(history_label)
         self.history_tab.setLayout(layout)
 
@@ -156,9 +156,13 @@ class ReferralApp(QMainWindow):
         save_button.clicked.connect(self.save_settings)
         layout.addRow(save_button)
 
-        help_text = QLabel("\n\n\nHelp us improve by reporting bugs or suggesting features.\nGithub: https://www.github.com/jaygala223/AutoRef")
+        help_text = QLabel("\n\n\nHelp us improve by reporting bugs or suggesting features.")
         help_text.setWordWrap(True)
         layout.addRow(help_text)
+
+        github_link = QLabel('Github: <a href="https://www.github.com/jaygala223/AutoRef">https://www.github.com/jaygala223/AutoRef</a>')
+        github_link.setOpenExternalLinks(True)
+        layout.addRow(github_link)
 
         self.settings_tab.setLayout(layout)
 
