@@ -1,4 +1,5 @@
 import sys
+import json
 from PyQt6.QtWidgets import (QApplication, QWidget, QVBoxLayout, QHBoxLayout, QLabel, QLineEdit, QPushButton, QFileDialog, QMessageBox,
                              QTabWidget, QScrollArea, QFormLayout, QCheckBox, QComboBox, QStackedWidget, QDialog, QMainWindow, QStatusBar)
 from PyQt6.QtGui import QFont, QIcon
@@ -6,54 +7,13 @@ from PyQt6.QtCore import Qt, QSize
 from pathlib import Path
 from resume_parser import extract_info_from_resume
 from selenium_autofill import fill_workday_form_using_selenium
-import stripe
-
-class PaymentDialog(QDialog):
-    def __init__(self, parent=None):
-        super().__init__(parent)
-        self.setWindowTitle("Payment")
-        self.setGeometry(300, 300, 400, 250)
-        
-        layout = QVBoxLayout()
-        
-        self.amount_label = QLabel("Your card will be charged $5 for 5 referrals.\nPayments are processed securely using Stripe.")
-        self.amount_label.setWordWrap(True)
-        layout.addWidget(self.amount_label)
-        
-        self.card_number = QLineEdit()
-        self.card_number.setPlaceholderText("Card Number")
-        layout.addWidget(self.card_number)
-        
-        self.expiry = QLineEdit()
-        self.expiry.setPlaceholderText("MM/YY")
-        layout.addWidget(self.expiry)
-        
-        self.cvc = QLineEdit()
-        self.cvc.setPlaceholderText("CVC")
-        layout.addWidget(self.cvc)
-        
-        self.pay_button = QPushButton("Pay")
-        self.pay_button.clicked.connect(self.process_payment)
-        layout.addWidget(self.pay_button)
-        
-        self.setLayout(layout)
-
-    def process_payment(self):
-        # Here you would integrate with Stripe API to process the payment
-        # For demonstration, we'll just show a success message
-        QMessageBox.information(self, "Payment Successful", "Your payment was processed successfully!")
-        self.accept()
 
 class ReferralApp(QMainWindow):
     def __init__(self):
         super().__init__()
-        self.referral_count = 0
-        self.max_free_referrals = 5
         self.max_resumes = 5
+        self.settings = self.load_settings()
         self.initUI()
-        
-        # Initialize Stripe
-        stripe.api_key = "your_stripe_secret_key"
 
     def initUI(self):
         self.setWindowTitle('AutoRef - Professional Referral Management')
@@ -72,16 +32,16 @@ class ReferralApp(QMainWindow):
         
         self.referral_tab = QWidget()
         self.history_tab = QWidget()
-        self.help_tab = QWidget()
+        self.settings_tab = QWidget()
         
         self.tab_widget.addTab(self.referral_tab, "New Referral")
         self.tab_widget.addTab(self.history_tab, "History")
-        self.tab_widget.addTab(self.help_tab, "Help")
+        self.tab_widget.addTab(self.settings_tab, "Settings")
         
         # Set up the tabs
         self.setup_referral_tab()
         self.setup_history_tab()
-        self.setup_help_tab()
+        self.setup_settings_tab()
         
         main_layout.addWidget(self.tab_widget)
 
@@ -146,34 +106,16 @@ class ReferralApp(QMainWindow):
         self.job_id_input.setPlaceholderText("Enter Job IDs (comma separated)...")
         layout.addRow("Job IDs:", self.job_id_input)
 
-        # Default Email Section
-        self.email_input = QLineEdit()
-        layout.addRow("Default Email:", self.email_input)
-
-        # Default Country Section
-        self.default_country = QLineEdit()
-        self.default_country.setPlaceholderText("Enter Default Country...")
-        layout.addRow("Default Country:", self.default_country)
-
         # HR/Referral Platform Section
         self.platform_dropdown = QComboBox()
         self.platform_dropdown.addItem("Workday + Azure SSO")
         self.platform_dropdown.addItem("Zoho (Not available yet. Work is in progress)")
         layout.addRow("HR/Referral Platform:", self.platform_dropdown)
 
-        # Referral Form Link Section
-        self.form_link_input = QLineEdit()
-        self.form_link_input.setPlaceholderText("Enter the URL of your referral form...")
-        layout.addRow("Referral Form Link:", self.form_link_input)
-
         # Submit Button
         self.submit_button = QPushButton("Submit Referral")
         self.submit_button.clicked.connect(self.submit_referral)
         layout.addRow(self.submit_button)
-
-        # Referral Count Label
-        self.referral_count_label = QLabel(f"Referrals remaining: {self.max_free_referrals - self.referral_count}")
-        layout.addRow(self.referral_count_label)
 
         self.referral_tab.setLayout(layout)
 
@@ -183,12 +125,42 @@ class ReferralApp(QMainWindow):
         layout.addWidget(history_label)
         self.history_tab.setLayout(layout)
 
-    def setup_help_tab(self):
-        layout = QVBoxLayout()
-        help_text = QLabel("Help us improve by reporting bugs or suggesting features.\nContact us at support@referralapp.com")
+    def setup_settings_tab(self):
+        layout = QFormLayout()
+
+        # Default Country Section
+        self.default_country = QLineEdit()
+        self.default_country.setText(self.settings.get('default_country', ''))
+        self.default_country.setPlaceholderText("Enter Default Country...")
+        layout.addRow("Default Country:", self.default_country)
+
+        # Referrer's Email Section
+        self.email_input = QLineEdit()
+        self.email_input.setText(self.settings.get('referrer_email', ''))
+        layout.addRow("Referrer's Email:", self.email_input)
+
+        # Referral Form Link Section
+        self.form_link_input = QLineEdit()
+        self.form_link_input.setText(self.settings.get('form_link', ''))
+        self.form_link_input.setPlaceholderText("Enter the URL of your referral form...")
+        layout.addRow("Referral Form Link:", self.form_link_input)
+
+        # Chrome Driver Path Section
+        self.chrome_driver_path = QLineEdit()
+        self.chrome_driver_path.setText(self.settings.get('chrome_driver_path', ''))
+        self.chrome_driver_path.setPlaceholderText("Enter the path to your Chrome driver...")
+        layout.addRow("Chrome Driver Path:", self.chrome_driver_path)
+
+        # Save Settings Button
+        save_button = QPushButton("Save Settings")
+        save_button.clicked.connect(self.save_settings)
+        layout.addRow(save_button)
+
+        help_text = QLabel("\n\n\nHelp us improve by reporting bugs or suggesting features.\nGithub: https://www.github.com/jaygala223/AutoRef")
         help_text.setWordWrap(True)
-        layout.addWidget(help_text)
-        self.help_tab.setLayout(layout)
+        layout.addRow(help_text)
+
+        self.settings_tab.setLayout(layout)
 
     def upload_resume(self):
         file_names, _ = QFileDialog.getOpenFileNames(self, "Upload Resumes", "", "PDF Files (*.pdf);;All Files (*)")
@@ -201,8 +173,10 @@ class ReferralApp(QMainWindow):
     def submit_referral(self):
         resume_paths = self.resume_path.text().split(",")
         job_ids = self.job_id_input.text().split(",")
-        referrer_email = self.email_input.text()
-        country_name = self.default_country.text()
+        referrer_email = self.settings.get('referrer_email', '')
+        country_name = self.settings.get('default_country', '')
+        form_link = self.settings.get('form_link', '')
+        chrome_driver_path = self.settings.get('chrome_driver_path', '')
 
         if not resume_paths or not job_ids:
             QMessageBox.warning(self, "Missing Information", "Please provide both resumes and Job IDs.")
@@ -212,35 +186,38 @@ class ReferralApp(QMainWindow):
             QMessageBox.warning(self, "Too Many Inputs", f"You can only submit a maximum of {self.max_resumes} resumes and job IDs at a time.")
             return
 
-        if self.referral_count >= self.max_free_referrals:
-            reply = QMessageBox.question(self, "Free Limit Reached", 
-                                         "You have reached the limit of free referrals. Would you like to make a payment to continue?",
-                                         QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
-            if reply == QMessageBox.StandardButton.Yes:
-                payment_dialog = PaymentDialog(self)
-                if payment_dialog.exec() == QDialog.DialogCode.Accepted:
-                    self.referral_count = 0
-                    self.referral_count_label.setText(f"Referrals remaining: {self.max_free_referrals - self.referral_count}")
-                else:
-                    return
-            else:
-                return
+        if not all([referrer_email, country_name, form_link, chrome_driver_path]):
+            QMessageBox.warning(self, "Missing Settings", "Please fill in all the settings before submitting a referral.")
+            return
 
         try:
             for resume_path, job_id in zip(resume_paths, job_ids):
-                if self.referral_count >= self.max_free_referrals:
-                    break
-                
                 candidate_name, candidate_phone_number, candidate_email = extract_info_from_resume(Path(resume_path.strip()))
                 
-                fill_workday_form_using_selenium(referrer_email=referrer_email, name=candidate_name, email=candidate_email, country_name=country_name, phone_number=candidate_phone_number, job_req_id=job_id.strip(), resume_path=Path(resume_path.strip()))
+                fill_workday_form_using_selenium(referrer_email=referrer_email, name=candidate_name, email=candidate_email, country_name=country_name, phone_number=candidate_phone_number, job_req_id=job_id.strip(), resume_path=Path(resume_path.strip()), form_link=form_link, chrome_driver_path=chrome_driver_path)
                 
-                self.referral_count += 1
-                self.referral_count_label.setText(f"Referrals remaining: {self.max_free_referrals - self.referral_count}")
-
             QMessageBox.information(self, "Referrals Submitted", "Referrals have been submitted successfully!")
         except Exception as e:
             QMessageBox.critical(self, "Error", f"An error occurred: {str(e)}")
+
+    def load_settings(self):
+        try:
+            with open('settings.json', 'r') as f:
+                return json.load(f)
+        except FileNotFoundError:
+            return {}
+
+    def save_settings(self):
+        settings = {
+            'default_country': self.default_country.text(),
+            'referrer_email': self.email_input.text(),
+            'form_link': self.form_link_input.text(),
+            'chrome_driver_path': self.chrome_driver_path.text()
+        }
+        with open('settings.json', 'w') as f:
+            json.dump(settings, f)
+        self.settings = settings
+        QMessageBox.information(self, "Settings Saved", "Your settings have been saved successfully!")
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)

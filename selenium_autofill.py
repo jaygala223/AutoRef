@@ -10,12 +10,16 @@ from selenium.webdriver.common.action_chains import ActionChains
 from threading import Thread
 
 
-def fill_workday_form_using_selenium(referrer_email:str, name:str, email:str, country_name:str, phone_number:str, job_req_id:str, resume_path):
+def fill_workday_form_using_selenium(referrer_email:str, name:str, email:str, country_name:str, phone_number:str, job_req_id:str, resume_path, form_link:str, chrome_driver_path="", headless:bool=False):
     chrome_options = webdriver.ChromeOptions()
-    # chrome_options.add_argument("--headless=new")
-    driver = webdriver.Chrome(executable_path = "C:/Users/jgala/Downloads/chromedriver-win32/chromedriver-win32/chromedriver.exe", chrome_options=chrome_options)
+    if headless:
+        chrome_options.add_argument("--headless=new")
+    driver = webdriver.Chrome(executable_path = chrome_driver_path, chrome_options=chrome_options)
+    # driver = webdriver.Chrome(executable_path = "C:/Users/jgala/Downloads/chromedriver-win32/chromedriver-win32/chromedriver.exe", chrome_options=chrome_options)
     
-    driver.get('https://login.microsoftonline.com/46c98d88-e344-4ed4-8496-4ed7712e255d/reprocess?ctx=rQQIARAA42KwkskoKSmw0tcvLy_XK88vyk5JrNRLzs_Vz8wrSc0pEuISOCNrZC3S8suhKazpQIixKcMqRgOQlmKontxKDF36OfnpmXm6xYm5OXoZJbk5KYcYVeONLJOMk1JSLXVTDBLNdU0MUix1Lc1TEnWNTSzMki3S0pJSjVMuMDK-YGS8xcQaDNRqtIlZxcQs2dIixcJCN9XYxETXJDXFRNfCxNIMxDI3NzRKNTI1TbnAwvODhXERK9Cpv7zYud4xH3PdtGfaApEb8QynWPUjfdONCjMC9U1ctA2d86vKki0LK1OCzLMjUwq9XYqNsyKTHMtKPUOy00ItbM2tDCew8Z5iY_jAxtjBzjCLneEAJ-MBXoYffHdf3_61b_rGdx6v-HUMHCv98qpC0jwc9SvcLYtMKrWT8zICisxT9LP8TQr9DCvcTILLnZyKXMw8bTcIMDwQYAAA0')
+    # driver.get('https://login.microsoftonline.com/46c98d88-e344-4ed4-8496-4ed7712e255d/reprocess?ctx=rQQIARAA42KwkskoKSmw0tcvLy_XK88vyk5JrNRLzs_Vz8wrSc0pEuISOCNrZC3S8suhKazpQIixKcMqRgOQlmKontxKDF36OfnpmXm6xYm5OXoZJbk5KYcYVeONLJOMk1JSLXVTDBLNdU0MUix1Lc1TEnWNTSzMki3S0pJSjVMuMDK-YGS8xcQaDNRqtIlZxcQs2dIixcJCN9XYxETXJDXFRNfCxNIMxDI3NzRKNTI1TbnAwvODhXERK9Cpv7zYud4xH3PdtGfaApEb8QynWPUjfdONCjMC9U1ctA2d86vKki0LK1OCzLMjUwq9XYqNsyKTHMtKPUOy00ItbM2tDCew8Z5iY_jAxtjBzjCLneEAJ-MBXoYffHdf3_61b_rGdx6v-HUMHCv98qpC0jwc9SvcLYtMKrWT8zICisxT9LP8TQr9DCvcTILLnZyKXMw8bTcIMDwQYAAA0')
+
+    driver.get(form_link)
 
     time.sleep(5)
 
@@ -116,8 +120,7 @@ def fill_workday_form_using_selenium(referrer_email:str, name:str, email:str, co
     keyboard.press(Key.enter)
     keyboard.release(Key.enter)
 
-    time.sleep(3)
-
+    time.sleep(5) # wait for resume to be uploaded
 
     # submit form
     # submit = driver.find_element(By.CSS_SELECTOR, '''.WCUM.WGAO.WCHN.WGVM.WGUM''').click()
@@ -125,7 +128,7 @@ def fill_workday_form_using_selenium(referrer_email:str, name:str, email:str, co
     driver.close()
 
 def run_in_thread(referrer_email, name, email, country_name, phone_number, job_req_id, resume_path):
-    thread = Thread(target=fill_form_using_selenium, args=(referrer_email, name, email, country_name, phone_number, job_req_id, resume_path))
+    thread = Thread(target=fill_workday_form_using_selenium, args=(referrer_email, name, email, country_name, phone_number, job_req_id, resume_path))
     thread.start()
 
 # if __name__ == "__main__":
