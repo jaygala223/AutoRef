@@ -15,9 +15,6 @@ def fill_workday_form_using_selenium(referrer_email:str, name:str, email:str, co
     if headless:
         chrome_options.add_argument("--headless=new")
     driver = webdriver.Chrome(executable_path = chrome_driver_path, chrome_options=chrome_options)
-    # driver = webdriver.Chrome(executable_path = "C:/Users/jgala/Downloads/chromedriver-win32/chromedriver-win32/chromedriver.exe", chrome_options=chrome_options)
-    
-    # driver.get('https://login.microsoftonline.com/46c98d88-e344-4ed4-8496-4ed7712e255d/reprocess?ctx=rQQIARAA42KwkskoKSmw0tcvLy_XK88vyk5JrNRLzs_Vz8wrSc0pEuISOCNrZC3S8suhKazpQIixKcMqRgOQlmKontxKDF36OfnpmXm6xYm5OXoZJbk5KYcYVeONLJOMk1JSLXVTDBLNdU0MUix1Lc1TEnWNTSzMki3S0pJSjVMuMDK-YGS8xcQaDNRqtIlZxcQs2dIixcJCN9XYxETXJDXFRNfCxNIMxDI3NzRKNTI1TbnAwvODhXERK9Cpv7zYud4xH3PdtGfaApEb8QynWPUjfdONCjMC9U1ctA2d86vKki0LK1OCzLMjUwq9XYqNsyKTHMtKPUOy00ItbM2tDCew8Z5iY_jAxtjBzjCLneEAJ-MBXoYffHdf3_61b_rGdx6v-HUMHCv98qpC0jwc9SvcLYtMKrWT8zICisxT9LP8TQr9DCvcTILLnZyKXMw8bTcIMDwQYAAA0')
 
     driver.get(form_link)
 
@@ -96,7 +93,6 @@ def fill_workday_form_using_selenium(referrer_email:str, name:str, email:str, co
     driver.maximize_window() # removes any popups from workday
 
     # ref agreement
-    # referral_agreement = driver.find_element(By.ID, "56$444619--uid33-input").click()
     try:
         referral_agreement = WebDriverWait(driver, 10).until(
             EC.element_to_be_clickable((By.XPATH, '''//*[@id="56$444619--uid33"]/div'''))
@@ -104,12 +100,6 @@ def fill_workday_form_using_selenium(referrer_email:str, name:str, email:str, co
         driver.execute_script("arguments[0].click();", referral_agreement)
     except TimeoutException:
         print("Timeout: Unable to click the referral agreement checkbox")
-
-    # referral_agreement = driver.find_element(By.XPATH, """//*[@id="56$444619--uid33-input"]""").click()
-
-
-    # ActionChains(driver).click(referral_agreement).perform()
-
 
     # resume upload
     import os
@@ -123,7 +113,7 @@ def fill_workday_form_using_selenium(referrer_email:str, name:str, email:str, co
     time.sleep(5) # wait for resume to be uploaded
 
     # submit form
-    # submit = driver.find_element(By.CSS_SELECTOR, '''.WCUM.WGAO.WCHN.WGVM.WGUM''').click()
+    submit = driver.find_element(By.CSS_SELECTOR, '''.WCUM.WGAO.WCHN.WGVM.WGUM''').click()
     # time.sleep(100)
     driver.close()
 
