@@ -31,7 +31,7 @@ def fill_workday_form_using_selenium(referrer_email:str, name:str, email:str, co
 
     driver.implicitly_wait(10)
 
-    driver.get("https://www.myworkday.com/intel/d/task/2997$6500.htmld")
+    driver.get(form_link)
 
     time.sleep(5)
 
